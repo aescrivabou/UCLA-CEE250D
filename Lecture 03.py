@@ -50,7 +50,7 @@ plt.plot(df15.DATE, df15.STORAGE_af, label = "Outflow")
 
 #parameters
 K = 2030000
-D = 2500
+D = 5000
 
 T = len(df15)
 
@@ -61,6 +61,8 @@ R = np.zeros(T)
 
 #Variables
 S = np.zeros(T)
+shortage = np.zeros(T)
+spill = np.zeros(T)
 
 #Let's start at the beginning of the first period
 S[0] = K/2
@@ -69,20 +71,22 @@ R[0] = D
 for t in range(1, T):
     #Storage at the beginning of next period, obtained as a mass balance
     S[t] = S[t-1] + Q[t-1] - R[t-1]
-    
-    #There are three options
-    #1 Reservoir empty and we cannot meet demands
+    #First condition
     if S[t] + Q[t]<D:
         R[t] = S[t] + Q[t]
-    #2 We have enough water, and reservoir is not full
-    elif S[t] + Q[t] - D < K:
+    #Second condition
+    elif S[t] + Q[t] < K + D:
         R[t] = D
-    #3 Reservoir is full
+    #Third condition
     else:
-        R[t] = max(D,S[t] + Q[t] - D - K)
+        R[t] = S[t] + Q[t] - K
 
+
+df15['inflows'] = Q
 df15['storage'] = S
 df15['release'] = R
+
+
 
 #A nicer 3-panel plot
 f3 = plt.subplots(3,1)
